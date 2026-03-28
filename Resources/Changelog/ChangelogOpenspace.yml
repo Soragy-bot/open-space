@@ -27,3 +27,12 @@ Entries:
   id: 4
   time: '2026-03-27T01:35:17.000000+00:00'
   url: https://github.com/ss14-art/open-space/pull/26
+- author: AL_S
+  changes:
+  - type: Add
+    message: Локаль спрайтов
+  - type: Tweak
+    message: Много респрайтов
+  id: 5
+  time: '2026-03-28T21:12:14.000000+00:00'
+  url: https://github.com/ss14-art/open-space/pull/13
