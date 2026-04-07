@@ -34,33 +34,58 @@ namespace Content.Shared.Localizations
             _loc.LoadCulture(culture);
             _loc.LoadCulture(fallbackCulture); // Corvax-Localization
             _loc.SetFallbackCluture(fallbackCulture); // Corvax-Localization
-            var cultures = new[] { culture, fallbackCulture };
-
-            foreach (var c in cultures)
-            {
-                _loc.AddFunction(c, "MANY", FormatMany); // Corvax-Localization: To prevent problems in auto-generated locale files
-                _loc.AddFunction(c, "PRESSURE", FormatPressure);
-                _loc.AddFunction(c, "POWERWATTS", FormatPowerWatts);
-                _loc.AddFunction(c, "POWERJOULES", FormatPowerJoules);
-                // NOTE: ENERGYWATTHOURS() still takes a value in joules, but formats as watt-hours.
-                _loc.AddFunction(c, "ENERGYWATTHOURS", FormatEnergyWattHours);
-                _loc.AddFunction(c, "UNITS", FormatUnits);
-                _loc.AddFunction(c, "TOSTRING", args => FormatToString(c, args));
-                _loc.AddFunction(c, "LOC", FormatLoc);
-                _loc.AddFunction(c, "NATURALFIXED", FormatNaturalFixed);
-                _loc.AddFunction(c, "NATURALPERCENT", FormatNaturalPercent);
-                _loc.AddFunction(c, "PLAYTIME", FormatPlaytime);
-            }
+            // OpenSpace-Edit Start - Dummy implementation for MANY & MAKEPLURAL to prevent english plural rules in ru-RU
+            _loc.AddFunction(culture, "MAKEPLURAL", FormatManyRu);
+            _loc.AddFunction(culture, "MANY", FormatManyRu); // Corvax-Localization: To prevent problems in auto-generated locale files
+            // OpenSpace-Edit End
+            _loc.AddFunction(culture, "PRESSURE", FormatPressure);
+            _loc.AddFunction(culture, "POWERWATTS", FormatPowerWatts);
+            _loc.AddFunction(culture, "POWERJOULES", FormatPowerJoules);
+            // NOTE: ENERGYWATTHOURS() still takes a value in joules, but formats as watt-hours.
+            _loc.AddFunction(culture, "ENERGYWATTHOURS", FormatEnergyWattHours);
+            _loc.AddFunction(culture, "UNITS", FormatUnits);
+            _loc.AddFunction(culture, "TOSTRING", args => FormatToString(culture, args));
+            _loc.AddFunction(culture, "LOC", FormatLoc);
+            // OpenSpace-Edit Start - Pass culture to formatter delegates
+            _loc.AddFunction(culture, "NATURALFIXED", args => FormatNaturalFixed(culture, args));
+            _loc.AddFunction(culture, "NATURALPERCENT", args => FormatNaturalPercent(culture, args));
+            // OpenSpace-Edit End
+            _loc.AddFunction(culture, "PLAYTIME", FormatPlaytime);
 
             /*
              * The following language functions are specific to the english localization. When working on your own
              * localization you should NOT modify these, instead add new functions specific to your language/culture.
              * This ensures the english translations continue to work as expected when fallbacks are needed.
              */
-            _loc.AddFunction(fallbackCulture, "MAKEPLURAL", FormatMakePlural);
+            var cultureEn = new CultureInfo("en-US");
+
+            _loc.AddFunction(cultureEn, "MAKEPLURAL", FormatMakePlural);
+            _loc.AddFunction(cultureEn, "MANY", FormatMany);
+
+            // OpenSpace-Added Start - Register formatting functions for fallback culture to avoid Unknown Function crashes
+            _loc.AddFunction(fallbackCulture, "PRESSURE", FormatPressure);
+            _loc.AddFunction(fallbackCulture, "POWERWATTS", FormatPowerWatts);
+            _loc.AddFunction(fallbackCulture, "POWERJOULES", FormatPowerJoules);
+            _loc.AddFunction(fallbackCulture, "ENERGYWATTHOURS", FormatEnergyWattHours);
+            _loc.AddFunction(fallbackCulture, "UNITS", FormatUnits);
+            _loc.AddFunction(fallbackCulture, "TOSTRING", args => FormatToString(fallbackCulture, args));
+            _loc.AddFunction(fallbackCulture, "LOC", FormatLoc);
+            _loc.AddFunction(fallbackCulture, "NATURALFIXED", args => FormatNaturalFixed(fallbackCulture, args));
+            _loc.AddFunction(fallbackCulture, "NATURALPERCENT", args => FormatNaturalPercent(fallbackCulture, args));
+            _loc.AddFunction(fallbackCulture, "PLAYTIME", FormatPlaytime);
+            // OpenSpace-Added End
         }
 
         // Corvax-Localization end
+
+        // OpenSpace-Added Start - dummy ru-RU MANY to avoid english suffix
+        private ILocValue FormatManyRu(LocArgs args)
+        {
+            // Dummy ru-RU implementation for MANY to prevent crashes in auto-generated files.
+            // Returning the string as-is since Russian pluralization cannot be reliably automated without a dictionary.
+            return (LocValueString) args.Args[0];
+        }
+        // OpenSpace-Added End
 
         private ILocValue FormatMany(LocArgs args)
         {
@@ -76,23 +101,25 @@ namespace Content.Shared.Localizations
             }
         }
 
-        private ILocValue FormatNaturalPercent(LocArgs args)
+        // OpenSpace-Edit Start - Pass CultureInfo via method arg
+        private ILocValue FormatNaturalPercent(CultureInfo culture, LocArgs args)
         {
             var number = ((LocValueNumber) args.Args[0]).Value * 100;
             var maxDecimals = (int)Math.Floor(((LocValueNumber) args.Args[1]).Value);
-            var formatter = (NumberFormatInfo)NumberFormatInfo.GetInstance(CultureInfo.GetCultureInfo(Culture)).Clone();
+            var formatter = (NumberFormatInfo)NumberFormatInfo.GetInstance(culture).Clone();
             formatter.NumberDecimalDigits = maxDecimals;
             return new LocValueString(string.Format(formatter, "{0:N}", number).TrimEnd('0').TrimEnd(char.Parse(formatter.NumberDecimalSeparator)) + "%");
         }
 
-        private ILocValue FormatNaturalFixed(LocArgs args)
+        private ILocValue FormatNaturalFixed(CultureInfo culture, LocArgs args)
         {
             var number = ((LocValueNumber) args.Args[0]).Value;
             var maxDecimals = (int)Math.Floor(((LocValueNumber) args.Args[1]).Value);
-            var formatter = (NumberFormatInfo)NumberFormatInfo.GetInstance(CultureInfo.GetCultureInfo(Culture)).Clone();
+            var formatter = (NumberFormatInfo)NumberFormatInfo.GetInstance(culture).Clone();
             formatter.NumberDecimalDigits = maxDecimals;
             return new LocValueString(string.Format(formatter, "{0:N}", number).TrimEnd('0').TrimEnd(char.Parse(formatter.NumberDecimalSeparator)));
         }
+        // OpenSpace-Edit End
 
         private static readonly Regex PluralEsRule = new("^.*(s|sh|ch|x|z)$");
 
