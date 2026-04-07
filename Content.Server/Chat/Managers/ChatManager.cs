@@ -13,6 +13,7 @@ using Content.Shared.Chat;
 using Content.Shared.Database;
 using Content.Shared.Mind;
 using Content.Shared.Players.RateLimiting;
+using Content.Server._NullLink.PlayerData; // 🌟Starlight🌟
 using Robust.Shared.Configuration;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
@@ -37,6 +38,7 @@ internal sealed partial class ChatManager : IChatManager
     [Dependency] private readonly IReplayRecordingManager _replay = default!;
     [Dependency] private readonly IServerNetManager _netManager = default!;
     [Dependency] private readonly IAdminManager _adminManager = default!;
+    [Dependency] private readonly INullLinkPlayerManager _playerRoles = default!; // NullLink
     [Dependency] private readonly IAdminLogManager _adminLogger = default!;
     [Dependency] private readonly IServerPreferencesManager _preferencesManager = default!;
     [Dependency] private readonly IConfigurationManager _configurationManager = default!;
@@ -269,6 +271,7 @@ internal sealed partial class ChatManager : IChatManager
 
     #region Private API
 
+    //🌟Starlight🌟 start
     private void SendOOC(ICommonSession player, string message)
     {
         if (_adminManager.IsAdmin(player))
@@ -284,15 +287,28 @@ internal sealed partial class ChatManager : IChatManager
         }
 
         Color? colorOverride = null;
-        var wrappedMessage = Loc.GetString("chat-manager-send-ooc-wrap-message", ("playerName",player.Name), ("message", FormattedMessage.EscapeText(message)));
+        var nameColor = Color.LightSkyBlue;
+        var messageColor = Color.LightSkyBlue;
+        var titleColor = Color.LightSkyBlue;
+
+        var playerName = player.Name;
+        var playerTitle = "";
+
+        if(_playerRoles.TryGetPlayerData(player.UserId, out var playerData))
+            playerTitle = playerData.Title ?? "";
+
         if (_adminManager.HasAdminFlag(player, AdminFlags.NameColor))
         {
             var prefs = _preferencesManager.GetPreferences(player.UserId);
             colorOverride = prefs.AdminOOCColor;
+            messageColor = prefs.AdminOOCColor;
         }
-        if (  _netConfigManager.GetClientCVar(player.Channel, CCVars.ShowOocPatronColor) && player.Channel.UserData.PatronTier is { } patron && PatronOocColors.TryGetValue(patron, out var patronColor))
+
+        var wrappedMessage = Loc.GetString("chat-manager-send-ooc-wrap-message", ("playerTitle", playerTitle), ("nameColor", nameColor), ("messageColor", messageColor), ("playerName", playerName), ("message", FormattedMessage.EscapeText(message)));
+
+        if (_netConfigManager.GetClientCVar(player.Channel, CCVars.ShowOocPatronColor) && player.Channel.UserData.PatronTier is { } patron && PatronOocColors.TryGetValue(patron, out var patronColor))
         {
-            wrappedMessage = Loc.GetString("chat-manager-send-ooc-patron-wrap-message", ("patronColor", patronColor),("playerName", player.Name), ("message", FormattedMessage.EscapeText(message)));
+            wrappedMessage = Loc.GetString("chat-manager-send-ooc-patron-wrap-message", ("patronColor", patronColor), ("playerName", player.Name), ("message", FormattedMessage.EscapeText(message)));
         }
 
         //TODO: player.Name color, this will need to change the structure of the MsgChatMessage
@@ -300,6 +316,7 @@ internal sealed partial class ChatManager : IChatManager
         _discordLink.SendMessage(message, player.Name, ChatChannel.OOC);
         _adminLogger.Add(LogType.Chat, LogImpact.Low, $"OOC from {player:Player}: {message}");
     }
+    //🌟Starlight🌟 end
 
     private void SendAdminChat(ICommonSession player, string message)
     {

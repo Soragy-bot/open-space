@@ -14,6 +14,7 @@
     <PackageReference Include="NetCord" />
     <PackageReference Include="prometheus-net" />
     <PackageReference Include="Microsoft.Extensions.ObjectPool" />
+    <PackageReference Include="SS14.Starlight.NullLink" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Content.Packaging\Content.Packaging.csproj" />

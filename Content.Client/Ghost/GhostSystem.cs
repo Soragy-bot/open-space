@@ -197,6 +197,11 @@ namespace Content.Client.Ghost
             _console.RemoteExecuteCommand(null, "ghostroles");
         }
 
+        public void OpenGhostTheme() //🌟Starlight🌟
+        {
+            _console.RemoteExecuteCommand(null, "ghostTheme");
+        }
+
         public void ToggleGhostVisibility(bool? visibility = null)
         {
             GhostVisibility = visibility ?? !GhostVisibility;
