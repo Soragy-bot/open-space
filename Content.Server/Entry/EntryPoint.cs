@@ -1,4 +1,8 @@
 using System.Threading.Tasks;
+using Content.Server._NullLink.Core;
+using Content.Server._NullLink.EventBus;
+using Content.Server._NullLink.PlayerData;
+using Content.Shared._NullLink;
 using Content.Server.Acz;
 using Content.Server.Administration;
 using Content.Server.Administration.Logs;
@@ -81,6 +85,10 @@ namespace Content.Server.Entry
         [Dependency] private readonly ServerInfoManager _serverInfo = default!;
         [Dependency] private readonly ServerUpdateManager _updateManager = default!;
         [Dependency] private readonly ServerFeedbackManager _feedbackManager = null!;
+        [Dependency] private readonly IActorRouter _actorRouter = default!;
+        [Dependency] private readonly INullLinkPlayerManager _nullLinkPlayer = default!;
+        [Dependency] private readonly INullLinkEventBusManager _nullLinkEventBus = default!;
+        [Dependency] private readonly ISharedNullLinkPlayerRolesReqManager _nullLinkRolesReq = default!;
 
         public override void PreInit()
         {
@@ -173,6 +181,10 @@ namespace Content.Server.Entry
             _multiServerKick.Initialize();
             _cvarCtrl.Initialize();
             _feedbackManager.Initialize();
+            _nullLinkPlayer.Initialize();
+            _actorRouter.Initialize();
+            _nullLinkEventBus.Initialize();
+            _nullLinkRolesReq.Initialize();
         }
 
         public override void Update(ModUpdateLevel level, FrameEventArgs frameEventArgs)
@@ -207,6 +219,8 @@ namespace Content.Server.Entry
             }
 
             _serverApi.Shutdown();
+            _nullLinkPlayer.Shutdown();
+            _actorRouter.Shutdown();
 
             // We don't care when or how this finishes, just spin the task off into the void.
             _ = _discordLink.Shutdown();
