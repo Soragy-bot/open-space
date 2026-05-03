@@ -28,7 +28,6 @@ using Content.Shared.FeedbackSystem;
 using Content.Shared.IoC;
 using Content.Shared.Players.PlayTimeTracking;
 using Content.Shared.Players.RateLimiting;
-using Content.Shared.Starlight;
 using Content.Client._NullLink;
 using Content.Shared._NullLink;
 
@@ -72,11 +71,8 @@ namespace Content.Client.IoC
 
             // NullLink start
             collection.Register<INullLinkPlayerRolesManager, NullLinkPlayerRolesManager>();
-            collection.Register<ISharedNullLinkPlayerResourcesManager, NullLinkPlayerResourcesManager>();
-            collection.Register<INullLinkPlayerResourcesManager, NullLinkPlayerResourcesManager>();
             collection.Register<ISharedNullLinkPlayerRolesReqManager, PlayerRolesReqManager>();
             collection.Register<INullLinkPlayTimeManager, NullLinkPlayTimeManager>();
-            collection.Register<ISharedPlayersRoleManager, NullLinkClientSharedPlayersRoleManager>();
             // NullLink end
         }
     }

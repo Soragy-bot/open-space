@@ -24,7 +24,6 @@ public sealed partial class NullLinkPlayerManager : INullLinkPlayerManager
     [Dependency] private readonly ILogManager _logManager = default!;
     [Dependency] private readonly IPrototypeManager _proto = default!;
     [Dependency] private readonly PlayTimeTrackingManager _playTimeTrackingManager = default!;
-    [Dependency] private readonly ISharedNullLinkPlayerResourcesManager _playerResourcesManager = default!;
 
     private readonly ConcurrentDictionary<Guid, PlayerData> _playerById = [];
     private readonly ConcurrentDictionary<Guid, ICommonSession> _mentors = [];
@@ -34,27 +33,21 @@ public sealed partial class NullLinkPlayerManager : INullLinkPlayerManager
     private ServerPlaytimeRecognitionPrototype? _serverPlaytimeRecognition;
     private string? _server;
 
-    private bool _resourcesEnabled = false;
-
     public IEnumerable<ICommonSession> Mentors => _mentors.Values;
     public void Initialize()
     {
         _sawmill = _logManager.GetSawmill("NullLink player data");
         _netMgr.RegisterNetMessage<MsgUpdatePlayerRoles>();
         _netMgr.RegisterNetMessage<MsgUpdatePlayerPlayTime>();
-        _netMgr.RegisterNetMessage<MsgUpdatePlayerResources>();
         _playerManager.PlayerStatusChanged += PlayerStatusChanged;
         InitializeLinking();
         _cfg.OnValueChanged(NullLinkCCVars.RoleReqMentors, UpdateMentors, true);
         _cfg.OnValueChanged(NullLinkCCVars.TitleBuild, UpdateTitleBuilder, true);
         _cfg.OnValueChanged(NullLinkCCVars.Project, UpdateProject, true);
         _cfg.OnValueChanged(NullLinkCCVars.Server, UpdateServer, true);
-        _cfg.OnValueChanged(NullLinkCCVars.ResourcesEnabled, UpdateResources, true);
 
         _actors.OnConnected += OnNullLinkConnected;
     }
-
-    private void UpdateResources(bool obj) => _resourcesEnabled = obj;
 
     private void OnNullLinkConnected()
     {

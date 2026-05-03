@@ -31,7 +31,6 @@ using Content.Shared.IoC;
 using Content.Shared.Kitchen;
 using Content.Shared.Players.PlayTimeTracking;
 using Content.Shared.Players.RateLimiting;
-using Content.Shared.Starlight;
 using Content.Server._NullLink;
 using Content.Server._NullLink.Core;
 using Content.Server._NullLink.EventBus;
@@ -96,8 +95,6 @@ internal static class ServerContentIoC
         deps.Register<INullLinkPlayTimeManager, NullLinkPlayTimeManager>();
         deps.Register<INullLinkEventBusManager, NullLinkEventBusManager>();
         deps.Register<ISharedNullLinkPlayerRolesReqManager, PlayerRolesReqManager>();
-        deps.Register<ISharedNullLinkPlayerResourcesManager, NullLinkPlayerResourcesManager>();
-        deps.Register<ISharedPlayersRoleManager, NullLinkSharedPlayersRoleManager>();
         // NullLink end
     }
 }

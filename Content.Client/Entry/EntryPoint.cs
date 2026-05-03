@@ -82,7 +82,6 @@ namespace Content.Client.Entry
         [Dependency] private readonly ClientsidePlaytimeTrackingManager _clientsidePlaytimeManager = default!;
         [Dependency] private readonly ClientFeedbackManager _feedbackManager = null!;
         [Dependency] private readonly INullLinkPlayerRolesManager _nullLinkPlayerRolesManager = default!;
-        [Dependency] private readonly INullLinkPlayerResourcesManager _nullLinkResourcesManager = default!;
         [Dependency] private readonly ISharedNullLinkPlayerRolesReqManager _nullLinkRolesReq = default!;
 
         public override void PreInit()
@@ -190,7 +189,6 @@ namespace Content.Client.Entry
 
             // NullLink start
             _nullLinkPlayerRolesManager.Initialize();
-            _nullLinkResourcesManager.Initialize();
             _nullLinkRolesReq.Initialize();
             // NullLink end
 
